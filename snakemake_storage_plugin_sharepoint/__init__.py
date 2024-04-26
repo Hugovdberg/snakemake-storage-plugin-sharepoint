@@ -103,7 +103,7 @@ class StorageProvider(http.StorageProvider):
     @classmethod
     def is_valid_query(cls, query: str) -> StorageQueryValidationResult:
         try:
-            parsed = urlparse(f"http://example.com/{query}")
+            urlparse(f"http://example.com/{query}")
         except Exception as e:
             return StorageQueryValidationResult(
                 query=query,
@@ -128,7 +128,13 @@ class StorageObject(http.StorageObject, StorageObjectWrite):
 
     @property
     def full_query(self):
-        return f"{self.provider.settings.site_url}/{self.provider.settings.library}/{self.query}"
+        return "/".join(  # type: ignore
+            [
+                self.provider.settings.site_url,  # type: ignore
+                self.provider.settings.library,  # type: ignore
+                self.query,
+            ]
+        )
 
     def local_suffix(self):
         parsed = urlparse(self.full_query)
@@ -142,7 +148,10 @@ class StorageObject(http.StorageObject, StorageObjectWrite):
         overwrite = self.provider.settings.allow_overwrite
 
         digest_url = f"{site_url}/_api/contextinfo"
-        request_url = f"{site_url}/_api/web/getfolderbyserverrelativeurl('{folder}')/Files/add(url='{filename}',overwrite={str(overwrite).lower()})"
+        request_url = (
+            f"{site_url}/_api/web/getfolderbyserverrelativeurl('{folder}')/"
+            f"Files/add(url='{filename}',overwrite={str(overwrite).lower()})"
+        )
 
         headers = {
             "Content-Type": "application/json; odata=verbose",
