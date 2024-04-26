@@ -15,17 +15,17 @@ class TestStorageNoSettings(TestStorageBase):
     retrieve_only = True
 
     def get_query(self, tmp_path) -> str:
-        return "https://www.google.com"
+        return "stable"
 
     def get_query_not_existing(self, tmp_path) -> str:
-        return "https://www.google.com/this/does/not/exist"
+        return "this/does/not/exist"
 
     def get_storage_provider_cls(self) -> Type[StorageProviderBase]:
         return StorageProvider
 
     def get_storage_provider_settings(self) -> Optional[StorageProviderSettingsBase]:
         return StorageProviderSettings(
-            site_url="https://www.example.com", library="Shared Documents"
+            site_url="https://snakemake.readthedocs.io", library="en"
         )
 
     def get_example_args(self) -> List[str]:
