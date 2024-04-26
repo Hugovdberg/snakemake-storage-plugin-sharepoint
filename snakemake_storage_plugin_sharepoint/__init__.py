@@ -61,13 +61,9 @@ class StorageProvider(http.StorageProvider):
 
     def __post_init__(self):
         super().__post_init__()
-        if self.settings.site_url is None:
-            raise WorkflowError("No SharePoint site URL provided.")
-        else:
+        if self.settings.site_url is not None:
             self.settings.site_url = self.settings.site_url.rstrip("/")
-        if self.settings.library is None:
-            raise WorkflowError("No SharePoint folder provided.")
-        else:
+        if self.settings.library is not None:
             self.settings.library = self.settings.library.strip("/")
 
     def rate_limiter_key(self, query: str, operation: Operation) -> Any:
@@ -128,13 +124,11 @@ class StorageObject(http.StorageObject, StorageObjectWrite):
 
     @property
     def full_query(self):
-        return "/".join(  # type: ignore
-            [
-                self.provider.settings.site_url,  # type: ignore
-                self.provider.settings.library,  # type: ignore
-                self.query,
-            ]
-        )
+        if (site_url := self.provider.settings.site_url) is None:
+            raise WorkflowError("No site URL specified")
+        if (library := self.provider.settings.library) is None:
+            raise WorkflowError("No library specified")
+        return "/".join([site_url, library, self.query])
 
     def local_suffix(self):
         parsed = urlparse(self.full_query)
