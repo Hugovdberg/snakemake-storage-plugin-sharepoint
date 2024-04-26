@@ -24,7 +24,9 @@ class TestStorageNoSettings(TestStorageBase):
         return StorageProvider
 
     def get_storage_provider_settings(self) -> Optional[StorageProviderSettingsBase]:
-        return StorageProviderSettings()
+        return StorageProviderSettings(
+            site_url="https://www.example.com", library="Shared Documents"
+        )
 
     def get_example_args(self) -> List[str]:
         return []
