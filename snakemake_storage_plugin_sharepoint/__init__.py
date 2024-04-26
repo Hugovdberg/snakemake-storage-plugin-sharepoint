@@ -61,13 +61,9 @@ class StorageProvider(http.StorageProvider):
 
     def __post_init__(self):
         super().__post_init__()
-        if self.settings.site_url is None:
-            raise WorkflowError("No SharePoint site URL provided.")
-        else:
+        if self.settings.site_url is not None:
             self.settings.site_url = self.settings.site_url.rstrip("/")
-        if self.settings.library is None:
-            raise WorkflowError("No SharePoint folder provided.")
-        else:
+        if self.settings.library is not None:
             self.settings.library = self.settings.library.strip("/")
 
     def rate_limiter_key(self, query: str, operation: Operation) -> Any:
@@ -103,7 +99,7 @@ class StorageProvider(http.StorageProvider):
     @classmethod
     def is_valid_query(cls, query: str) -> StorageQueryValidationResult:
         try:
-            parsed = urlparse(f"http://example.com/{query}")
+            urlparse(f"http://example.com/{query}")
         except Exception as e:
             return StorageQueryValidationResult(
                 query=query,
@@ -128,7 +124,11 @@ class StorageObject(http.StorageObject, StorageObjectWrite):
 
     @property
     def full_query(self):
-        return f"{self.provider.settings.site_url}/{self.provider.settings.library}/{self.query}"
+        if (site_url := self.provider.settings.site_url) is None:
+            raise WorkflowError("No site URL specified")
+        if (library := self.provider.settings.library) is None:
+            raise WorkflowError("No library specified")
+        return "/".join([site_url, library, self.query])
 
     def local_suffix(self):
         parsed = urlparse(self.full_query)
@@ -142,7 +142,10 @@ class StorageObject(http.StorageObject, StorageObjectWrite):
         overwrite = self.provider.settings.allow_overwrite
 
         digest_url = f"{site_url}/_api/contextinfo"
-        request_url = f"{site_url}/_api/web/getfolderbyserverrelativeurl('{folder}')/Files/add(url='{filename}',overwrite={str(overwrite).lower()})"
+        request_url = (
+            f"{site_url}/_api/web/getfolderbyserverrelativeurl('{folder}')/"
+            f"Files/add(url='{filename}',overwrite={str(overwrite).lower()})"
+        )
 
         headers = {
             "Content-Type": "application/json; odata=verbose",
