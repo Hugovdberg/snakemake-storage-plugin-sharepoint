@@ -11,7 +11,7 @@ from snakemake_storage_plugin_sharepoint import StorageProvider, StorageProvider
 
 
 class TestStorageNoSettings(TestStorageBase):
-    __test__ = True
+    __test__ = False  # for now no way to test this as we don't have a way to mock the SharePoint server
     retrieve_only = True
 
     def get_query(self, tmp_path) -> str:
