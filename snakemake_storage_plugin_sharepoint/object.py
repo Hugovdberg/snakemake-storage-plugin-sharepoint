@@ -181,4 +181,4 @@ class FileInfo:
     def size(self) -> int:
         if not self.exists():
             return 0
-        return self.response.json()["d"]["Length"]
+        return int(self.response.json()["d"]["Length"])
