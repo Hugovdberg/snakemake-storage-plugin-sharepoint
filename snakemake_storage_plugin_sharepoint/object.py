@@ -9,30 +9,34 @@ from urllib.parse import urlparse
 
 import requests
 from snakemake_interface_common.exceptions import WorkflowError
+from snakemake_interface_common.logging import get_logger
 from snakemake_interface_storage_plugins.io import IOCacheStorageInterface, Mtime
 from snakemake_interface_storage_plugins.storage_object import (
     StorageObjectRead,
     StorageObjectWrite,
 )
 
-from .provider import StorageProvider
+if TYPE_CHECKING:
+    from .provider import StorageProvider
 
 __all__ = ["StorageObject"]
 
 HTTPVerb = Literal["GET", "POST", "HEAD"]
+logger = get_logger()
 
 
 class StorageObject(StorageObjectRead, StorageObjectWrite):
     DIGEST_URL = "{site_url}/_api/contextinfo"
     GET_FILE_URL = (
-        "{site_url}/_api/web/getfilebyserverrelativeurl('{folder}')/Files('{filename}')"
+        "{site_url}/_api/web/GetFolderByServerRelativeUrl('{folder}')/"
+        "Files('{filename}')"
     )
     DOWNLOAD_FILE_URL = (
-        "{site_url}/_api/web/getfilebyserverrelativeurl('{folder}')/"
+        "{site_url}/_api/web/GetFolderByServerRelativeUrl('{folder}')/"
         "Files('{filename}')/$value"
     )
     UPLOAD_FILE_URL = (
-        "{site_url}/_api/web/getfolderbyserverrelativeurl('{folder}')/"
+        "{site_url}/_api/web/GetFolderByServerRelativeUrl('{folder}')/"
         "Files/add(url='{filename}',overwrite={overwrite})"
     )
     if TYPE_CHECKING:
@@ -85,7 +89,10 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
             raise WorkflowError("No library specified")
         return "/".join([site_url, library, self.query])
 
-    def local_suffix(self) -> str:
+    # The type: ignore is necessary because the return type is not compatible with the
+    # base class:
+    # https://github.com/snakemake/snakemake-interface-storage-plugins/pull/48
+    def local_suffix(self) -> str:  # type: ignore
         parsed = urlparse(self._full_query)
         return f"{parsed.netloc}/{parsed.path}"
 
@@ -128,6 +135,14 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
             "Content-Type": "application/json; odata=verbose",
             "Accept": "application/json; odata=verbose",
         }
+        _url = url.format(
+            site_url=self.provider.settings.site_url,
+            folder=self.provider.settings.library,
+            filename=self.query,
+            overwrite=str(self.provider.settings.allow_overwrite).lower(),
+        )
+        logger.debug(f"Requesting {verb!r} to {_url}")
+        logger.debug(f"Authenticating with {self.provider.settings.auth}")
         if headers is not None:
             _headers.update(headers)
         r = None
@@ -143,18 +158,14 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
                     raise NotImplementedError(f"HTTP verb {verb} not implemented")
 
             r = request(
-                url.format(
-                    site_url=self.provider.settings.site_url,
-                    folder=self.provider.settings.library,
-                    filename=self.query,
-                    overwrite=str(self.provider.settings.allow_overwrite).lower(),
-                ),
+                _url,
                 stream=stream,
                 auth=self.provider.settings.auth,
                 headers=_headers,
-                allow_redirects=self.provider.settings.allow_redirects,
+                allow_redirects=self.provider.settings.allow_redirects or True,
                 **kwargs,
             )
+            logger.debug(f"Response: {r.status_code}")
 
             yield r
         finally:
@@ -181,4 +192,4 @@ class FileInfo:
     def size(self) -> int:
         if not self.exists():
             return 0
-        return self.response.json()["d"]["Length"]
+        return int(self.response.json()["d"]["Length"])

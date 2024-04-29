@@ -84,21 +84,23 @@ class StorageProviderSettings(StorageProviderSettingsBase):
     auth: Optional[requests.auth.AuthBase] = dataclasses.field(
         default=None,
         metadata={
-            "help": "HTTP(S) authentication. AUTH_TYPE is the class name of "
-            "requests.auth (e.g. HTTPBasicAuth), ARG1,ARG2,... are the arguments "
-            "required by the specified type. PACKAGE is the full path to the module "
-            "from which to import the class "
-            "(semantically this does 'from PACKAGE import AUTH_TYPE').",
+            "help": (
+                "HTTP(S) authentication. AUTH_TYPE is the class name of "
+                "requests.auth (e.g. HTTPBasicAuth), ARG1,ARG2,... are the arguments "
+                "required by the specified type. PACKAGE is the full path to the "
+                "module from which to import the class (semantically this  does "
+                "'from PACKAGE import AUTH_TYPE')."
+            ),
             "metavar": AUTH_METAVAR,
             "parse_func": parse_auth,
             "unparse_func": unparse_auth,
             "env_var": True,
         },
     )
-    allow_redirects: bool = dataclasses.field(
+    allow_redirects: Optional[bool] = dataclasses.field(
         default=True,
         metadata={
-            "help": "Allow redirects when retrieving files.",
+            "help": "Follow redirects when retrieving files.",
         },
     )
     site_url: Optional[str] = dataclasses.field(
