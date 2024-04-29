@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "snakemake-storage-plugin-sharepoint"
-version = "0.1.0"
+version = "0.2.0"
 description = "Snakemake storage plugin for reading and writing files on Microsoft SharePoint."
 authors = [
     "Hugo Lapre <hugo.lapre@brabantwater.nl>",
@@ -16,7 +16,6 @@ keywords = ["snakemake", "plugin", "storage", "sharepoint"]
 python = "^3.11"
 snakemake-interface-common = "^1.14.0"
 snakemake-interface-storage-plugins = "^3.0.0"
-snakemake-storage-plugin-http = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
 black = "^24.4.2"
