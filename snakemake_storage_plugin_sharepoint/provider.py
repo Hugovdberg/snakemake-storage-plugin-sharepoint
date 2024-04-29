@@ -11,9 +11,10 @@ from snakemake_interface_storage_plugins.storage_provider import (
     StorageQueryValidationResult,
 )
 
-from snakemake_storage_plugin_sharepoint.settings import StorageProviderSettings
+from .object import StorageObject
+from .settings import StorageProviderSettings
 
-__all__ = ["StorageProvider"]
+__all__ = ["StorageProvider", "StorageObject"]
 
 
 class StorageProvider(StorageProviderBase):
