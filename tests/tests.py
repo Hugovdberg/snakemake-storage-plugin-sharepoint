@@ -33,3 +33,7 @@ class TestStorageNoSettings(TestStorageBase):
 
     def get_example_args(self) -> List[str]:
         return []
+
+class TestNothing:
+    def test_nothing(self):
+        pass
