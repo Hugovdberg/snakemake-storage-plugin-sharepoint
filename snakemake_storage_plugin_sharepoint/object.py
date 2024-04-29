@@ -162,7 +162,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
                 stream=stream,
                 auth=self.provider.settings.auth,
                 headers=_headers,
-                allow_redirects=self.provider.settings.follow_redirects or True,
+                allow_redirects=self.provider.settings.allow_redirects or True,
                 **kwargs,
             )
             logger.debug(f"Response: {r.status_code}")
