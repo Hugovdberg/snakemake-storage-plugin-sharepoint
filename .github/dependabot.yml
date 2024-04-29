@@ -9,6 +9,5 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
-    commit_message:
+    commit-message:
       prefix: "chore"
-      include_scope: true
