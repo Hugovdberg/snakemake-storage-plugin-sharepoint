@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "snakemake-storage-plugin-sharepoint"
-version = "0.2.3"
+version = "0.2.4"
 description = "Snakemake storage plugin for reading and writing files on Microsoft SharePoint."
 authors = [
     "Hugo Lapre <hugo.lapre@brabantwater.nl>",
