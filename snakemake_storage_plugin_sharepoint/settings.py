@@ -110,12 +110,6 @@ class StorageProviderSettings(StorageProviderSettingsBase):
             "env_var": True,
         },
     )
-    library: Optional[str] = dataclasses.field(
-        default=None,
-        metadata={
-            "help": "The folder in the SharePoint site to work with.",
-        },
-    )
     allow_overwrite: bool = dataclasses.field(
         default=False,
         metadata={

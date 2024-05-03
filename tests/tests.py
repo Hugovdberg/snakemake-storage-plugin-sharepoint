@@ -18,7 +18,7 @@ class TestStorageNoSettings(TestStorageBase):
     __test__ = False
 
     def get_query(self, tmp_path) -> str:
-        return "stable"
+        return "en/stable"
 
     def get_query_not_existing(self, tmp_path) -> str:
         return "this/does/not/exist"
@@ -27,9 +27,7 @@ class TestStorageNoSettings(TestStorageBase):
         return StorageProvider
 
     def get_storage_provider_settings(self) -> Optional[StorageProviderSettingsBase]:
-        return StorageProviderSettings(
-            site_url="https://snakemake.readthedocs.io", library="en"
-        )
+        return StorageProviderSettings(site_url="https://snakemake.readthedocs.io")
 
     def get_example_args(self) -> List[str]:
         return []

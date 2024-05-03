@@ -15,6 +15,7 @@ from snakemake_interface_storage_plugins.storage_object import (
     StorageObjectRead,
     StorageObjectWrite,
 )
+from snakemake_interface_storage_plugins.storage_provider import StorageProviderBase
 
 if TYPE_CHECKING:
     from .provider import StorageProvider
@@ -42,6 +43,33 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
     if TYPE_CHECKING:
         provider: StorageProvider
 
+    def __init__(
+        self,
+        query: str,
+        keep_local: bool,
+        retrieve: bool,
+        provider: StorageProviderBase,
+    ):
+        self.allow_overwrite: bool
+        self.site_url: str
+        self.site_netloc: str
+        self.library: str
+        self.filepath: str
+        super().__init__(query, keep_local, retrieve, provider)
+
+    def __post_init__(self):
+        if (site_url := self.provider.settings.site_url) is None:
+            raise WorkflowError("No site URL specified")
+        parsed_site = urlparse(site_url)
+        self.site_url = site_url.rstrip("/")
+        self.site_netloc = parsed_site.netloc
+
+        parsed_query = urlparse(self.query)
+        self.library = parsed_query.netloc
+        self.filepath = parsed_query.path.lstrip("/")
+
+        self.allow_overwrite = self.provider.settings.allow_overwrite or False
+
     async def inventory(self, cache: IOCacheStorageInterface):
         """From this file, try to find as much existence and modification date
         information as possible. Only retrieve that information that comes for free
@@ -61,15 +89,15 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
         pass
 
     def exists(self) -> bool:
-        with self.httpr(self.GET_FILE_URL) as r:
+        with self.httpr(self.GET_FILE_URL, "GET") as r:
             return FileInfo(r).exists()
 
     def mtime(self) -> float:
-        with self.httpr(self.GET_FILE_URL) as r:
+        with self.httpr(self.GET_FILE_URL, "GET") as r:
             return FileInfo(r).last_modified()
 
     def size(self) -> int:
-        with self.httpr(self.GET_FILE_URL) as r:
+        with self.httpr(self.GET_FILE_URL, "GET") as r:
             return FileInfo(r).size()
 
     def retrieve_object(self):
@@ -81,20 +109,11 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
             for chunk in r.iter_content():
                 fh.write(chunk)
 
-    @property
-    def _full_query(self) -> str:
-        if (site_url := self.provider.settings.site_url) is None:
-            raise WorkflowError("No site URL specified")
-        if (library := self.provider.settings.library) is None:
-            raise WorkflowError("No library specified")
-        return "/".join([site_url, library, self.query])
-
     # The type: ignore is necessary because the return type is not compatible with the
     # base class:
     # https://github.com/snakemake/snakemake-interface-storage-plugins/pull/48
     def local_suffix(self) -> str:  # type: ignore
-        parsed = urlparse(self._full_query)
-        return f"{parsed.netloc}/{parsed.path}"
+        return "/".join([self.site_netloc, self.library, self.filepath])
 
     def store_object(self):
         with self.httpr(self.DIGEST_URL, "POST") as r:
@@ -136,12 +155,12 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
             "Accept": "application/json; odata=verbose",
         }
         _url = url.format(
-            site_url=self.provider.settings.site_url,
-            folder=self.provider.settings.library,
-            filename=self.query,
-            overwrite=str(self.provider.settings.allow_overwrite).lower(),
+            site_url=self.site_url,
+            folder=self.library,
+            filename=self.filepath,
+            overwrite=str(self.allow_overwrite).lower(),
         )
-        logger.debug(f"Requesting {verb!r} to {_url}")
+        logger.debug(f"Requesting HTTP {verb!r} {_url}")
         logger.debug(f"Authenticating with {self.provider.settings.auth}")
         if headers is not None:
             _headers.update(headers)

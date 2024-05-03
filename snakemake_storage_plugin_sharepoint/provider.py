@@ -25,8 +25,6 @@ class StorageProvider(StorageProviderBase):
         super().__post_init__()
         if self.settings.site_url is not None:
             self.settings.site_url = self.settings.site_url.rstrip("/")
-        if self.settings.library is not None:
-            self.settings.library = self.settings.library.strip("/")
 
     def rate_limiter_key(self, query: str, operation: Operation) -> Any:
         """Return a key for identifying a rate limiter given a query and an operation.
@@ -43,8 +41,8 @@ class StorageProvider(StorageProviderBase):
         """Return an example query with description for this storage provider."""
         return [
             ExampleQuery(
-                query="file.txt",
-                description="A file URL",
+                query="mssp://library/folder/file.txt",
+                description="A file URL in a SharePoint library.",
                 type=QueryType.INPUT,
             )
         ]
@@ -61,12 +59,18 @@ class StorageProvider(StorageProviderBase):
     @classmethod
     def is_valid_query(cls, query: str) -> StorageQueryValidationResult:
         try:
-            urlparse(f"http://example.com/{query}")
+            parsed = urlparse(query)
         except Exception as e:
             return StorageQueryValidationResult(
                 query=query,
                 valid=False,
                 reason=f"cannot be parsed as URL ({e})",
+            )
+        if not parsed.scheme == "mssp":
+            return StorageQueryValidationResult(
+                query=query,
+                valid=False,
+                reason="scheme must be 'mssp'",
             )
         return StorageQueryValidationResult(
             query=query,
