@@ -41,10 +41,27 @@ class StorageProvider(StorageProviderBase):
         """Return an example query with description for this storage provider."""
         return [
             ExampleQuery(
-                query="mssp://library/folder/file.txt",
-                description="A file URL in a SharePoint library.",
+                query="mssp://Documents/data.csv",
+                description=(
+                    "A file `data.csv` in a SharePoint library called `Documents`."
+                ),
                 type=QueryType.INPUT,
-            )
+            ),
+            ExampleQuery(
+                query="mssp://library/folder/file.txt",
+                description=(
+                    "A file `file.txt` in a folder named `folder` under a "
+                    "SharePoint library called `library`."
+                ),
+                type=QueryType.INPUT,
+            ),
+            ExampleQuery(
+                query="mssp://Documents/output.csv",
+                description=(
+                    "A file `target.csv` in a SharePoint library called `Documents`."
+                ),
+                type=QueryType.OUTPUT,
+            ),
         ]
 
     def default_max_requests_per_second(self) -> float:
