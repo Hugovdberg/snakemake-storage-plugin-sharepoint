@@ -18,10 +18,10 @@ class TestStorageNoSettings(TestStorageBase):
     __test__ = False
 
     def get_query(self, tmp_path) -> str:
-        return "en/stable"
+        return "mssp://en/stable"
 
     def get_query_not_existing(self, tmp_path) -> str:
-        return "this/does/not/exist"
+        return "mssp://this/does/not/exist"
 
     def get_storage_provider_cls(self) -> Type[StorageProviderBase]:
         return StorageProvider
