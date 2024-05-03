@@ -85,7 +85,10 @@ class StorageProvider(StorageProviderBase):
             return StorageQueryValidationResult(
                 query=query,
                 valid=False,
-                reason="path must specify the library and file path (e.g. mssp://library/file.txt or mssp://library/folder/file.txt)",
+                reason=(
+                    "path must specify the library and file path (e.g. "
+                    "mssp://library/file.txt or mssp://library/folder/file.txt)"
+                ),
             )
         return StorageQueryValidationResult(
             query=query,
