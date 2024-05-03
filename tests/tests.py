@@ -18,23 +18,47 @@ class TestStorageNoSettings(TestStorageBase):
     __test__ = False
 
     def get_query(self, tmp_path) -> str:
-        return "stable"
+        return "mssp://en/stable"
 
     def get_query_not_existing(self, tmp_path) -> str:
-        return "this/does/not/exist"
+        return "mssp://this/does/not/exist"
 
     def get_storage_provider_cls(self) -> Type[StorageProviderBase]:
         return StorageProvider
 
     def get_storage_provider_settings(self) -> Optional[StorageProviderSettingsBase]:
-        return StorageProviderSettings(
-            site_url="https://snakemake.readthedocs.io", library="en"
-        )
+        return StorageProviderSettings(site_url="https://snakemake.readthedocs.io")
 
     def get_example_args(self) -> List[str]:
         return []
 
 
-class TestNothing:
-    def test_nothing(self):
-        pass
+def query_is_valid(query: str) -> bool:
+    return StorageProvider.is_valid_query(query).valid
+
+
+def query_is_invalid(query: str) -> bool:
+    return not query_is_valid(query)
+
+
+class TestQueryValidation:
+    def test_query_with_library_and_filename_is_valid(self):
+        assert query_is_valid("mssp://library/filename.txt")
+
+    def test_query_with_library_and_folder_and_filename_is_valid(self):
+        assert query_is_valid("mssp://library/folder/filename.txt")
+
+    def test_empty_query_is_invalid(self):
+        assert query_is_invalid("")
+
+    def test_query_with_no_library_and_no_filename_is_invalid(self):
+        assert query_is_invalid("mssp://")
+
+    def test_query_with_library_and_no_filename_is_invalid(self):
+        assert query_is_invalid("mssp://library/")
+
+    def test_query_with_no_library_is_invalid(self):
+        assert query_is_invalid("mssp://filename.txt")
+
+    def test_query_with_no_schema_invalid(self):
+        assert query_is_invalid("library/filename.txt")

@@ -25,8 +25,6 @@ class StorageProvider(StorageProviderBase):
         super().__post_init__()
         if self.settings.site_url is not None:
             self.settings.site_url = self.settings.site_url.rstrip("/")
-        if self.settings.library is not None:
-            self.settings.library = self.settings.library.strip("/")
 
     def rate_limiter_key(self, query: str, operation: Operation) -> Any:
         """Return a key for identifying a rate limiter given a query and an operation.
@@ -43,10 +41,27 @@ class StorageProvider(StorageProviderBase):
         """Return an example query with description for this storage provider."""
         return [
             ExampleQuery(
-                query="file.txt",
-                description="A file URL",
+                query="mssp://Documents/data.csv",
+                description=(
+                    "A file `data.csv` in a SharePoint library called `Documents`."
+                ),
                 type=QueryType.INPUT,
-            )
+            ),
+            ExampleQuery(
+                query="mssp://library/folder/file.txt",
+                description=(
+                    "A file `file.txt` in a folder named `folder` under a "
+                    "SharePoint library called `library`."
+                ),
+                type=QueryType.INPUT,
+            ),
+            ExampleQuery(
+                query="mssp://Documents/output.csv",
+                description=(
+                    "A file `target.csv` in a SharePoint library called `Documents`."
+                ),
+                type=QueryType.OUTPUT,
+            ),
         ]
 
     def default_max_requests_per_second(self) -> float:
@@ -61,12 +76,36 @@ class StorageProvider(StorageProviderBase):
     @classmethod
     def is_valid_query(cls, query: str) -> StorageQueryValidationResult:
         try:
-            urlparse(f"http://example.com/{query}")
+            parsed = urlparse(query)
+            scheme = parsed.scheme
+            library = parsed.netloc
+            filepath = parsed.path.lstrip("/")
         except Exception as e:
             return StorageQueryValidationResult(
                 query=query,
                 valid=False,
                 reason=f"cannot be parsed as URL ({e})",
+            )
+        if not scheme == "mssp":
+            return StorageQueryValidationResult(
+                query=query,
+                valid=False,
+                reason="scheme must be 'mssp'",
+            )
+        if library == "":
+            return StorageQueryValidationResult(
+                query=query,
+                valid=False,
+                reason="library must be specified (e.g. mssp://library/file.txt)",
+            )
+        if filepath == "":
+            return StorageQueryValidationResult(
+                query=query,
+                valid=False,
+                reason=(
+                    "path must specify the library and file path (e.g. "
+                    "mssp://library/file.txt or mssp://library/folder/file.txt)"
+                ),
             )
         return StorageQueryValidationResult(
             query=query,

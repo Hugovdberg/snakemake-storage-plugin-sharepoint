@@ -1,5 +1,7 @@
-For now, the `site_url` and `library` settings are required settings on the storage provider.
-This is because the URL to a document cannot uniquely be parsed into the separate components.
+For now, the `site_url` setting is a required setting on the storage provider.
+This is because the URL to a document cannot uniquely be parsed into the separate components
+necessary for downloading and uploading on SharePoint (which are: site collection, library, 
+and filename).
 
 Also, overwriting files on SharePoint is disabled by default, and needs to be enabled on the 
 storage provider using the `allow_overwrite` setting.
