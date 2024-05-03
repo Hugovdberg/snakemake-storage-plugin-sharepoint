@@ -60,17 +60,32 @@ class StorageProvider(StorageProviderBase):
     def is_valid_query(cls, query: str) -> StorageQueryValidationResult:
         try:
             parsed = urlparse(query)
+            scheme = parsed.scheme
+            library = parsed.netloc
+            filepath = parsed.path.lstrip("/")
         except Exception as e:
             return StorageQueryValidationResult(
                 query=query,
                 valid=False,
                 reason=f"cannot be parsed as URL ({e})",
             )
-        if not parsed.scheme == "mssp":
+        if not scheme == "mssp":
             return StorageQueryValidationResult(
                 query=query,
                 valid=False,
                 reason="scheme must be 'mssp'",
+            )
+        if library == "":
+            return StorageQueryValidationResult(
+                query=query,
+                valid=False,
+                reason="library must be specified (e.g. mssp://library/file.txt)",
+            )
+        if filepath == "":
+            return StorageQueryValidationResult(
+                query=query,
+                valid=False,
+                reason="path must specify the library and file path (e.g. mssp://library/file.txt or mssp://library/folder/file.txt)",
             )
         return StorageQueryValidationResult(
             query=query,

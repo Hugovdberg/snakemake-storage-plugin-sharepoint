@@ -33,6 +33,32 @@ class TestStorageNoSettings(TestStorageBase):
         return []
 
 
-class TestNothing:
-    def test_nothing(self):
-        pass
+def query_is_valid(query: str) -> bool:
+    return StorageProvider.is_valid_query(query).valid
+
+
+def query_is_invalid(query: str) -> bool:
+    return not query_is_valid(query)
+
+
+class TestQueryValidation:
+    def test_query_with_library_and_filename_is_valid(self):
+        assert query_is_valid("mssp://library/filename.txt")
+
+    def test_query_with_library_and_folder_and_filename_is_valid(self):
+        assert query_is_valid("mssp://library/folder/filename.txt")
+
+    def test_empty_query_is_invalid(self):
+        assert query_is_invalid("")
+
+    def test_query_with_no_library_and_no_filename_is_invalid(self):
+        assert query_is_invalid("mssp://")
+
+    def test_query_with_library_and_no_filename_is_invalid(self):
+        assert query_is_invalid("mssp://library/")
+
+    def test_query_with_no_library_is_invalid(self):
+        assert query_is_invalid("mssp://filename.txt")
+
+    def test_query_with_no_schema_invalid(self):
+        assert query_is_invalid("library/filename.txt")
