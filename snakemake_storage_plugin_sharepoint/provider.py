@@ -56,7 +56,7 @@ class StorageProvider(StorageProviderBase):
                 type=QueryType.INPUT,
             ),
             ExampleQuery(
-                query="mssp://Documents/output.csv",
+                query="mssp://Documents/target.csv",
                 description=(
                     "A file `target.csv` in a SharePoint library called `Documents`."
                 ),
