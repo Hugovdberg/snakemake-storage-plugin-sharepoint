@@ -62,3 +62,21 @@ class TestQueryValidation:
 
     def test_query_with_no_schema_invalid(self):
         assert query_is_invalid("library/filename.txt")
+
+    def test_query_with_fragments_is_invalid(self):
+        assert query_is_invalid("mssp://library/filename.txt#fragment")
+
+    def test_query_with_overwrite_set_to_true_is_valid(self):
+        assert query_is_valid("mssp://library/filename.txt?overwrite=true")
+
+    def test_query_with_overwrite_set_to_empty_is_valid(self):
+        assert query_is_valid("mssp://library/filename.txt?overwrite")
+
+    def test_query_with_overwrite_set_to_false_is_valid(self):
+        assert query_is_valid("mssp://library/filename.txt?overwrite=false")
+
+    def test_query_with_overwrite_set_to_invalid_is_invalid(self):
+        assert query_is_invalid("mssp://library/filename.txt?overwrite=invalid")
+
+    def test_query_with_invalid_option_is_invalid(self):
+        assert query_is_invalid("mssp://library/filename.txt?invalid=true")

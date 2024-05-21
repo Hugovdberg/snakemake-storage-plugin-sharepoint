@@ -110,8 +110,8 @@ class StorageProviderSettings(StorageProviderSettingsBase):
             "env_var": True,
         },
     )
-    allow_overwrite: bool = dataclasses.field(
-        default=False,
+    allow_overwrite: Optional[bool] = dataclasses.field(
+        default=None,
         metadata={
             "help": "Allow overwriting files in the SharePoint site.",
         },

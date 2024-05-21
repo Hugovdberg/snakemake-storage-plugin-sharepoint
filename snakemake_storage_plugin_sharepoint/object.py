@@ -1,11 +1,12 @@
 # Required:
 # Implementation of storage object (also check out
 # snakemake_interface_storage_plugins.storage_object for more base class options)
+import dataclasses
 import datetime
+import urllib.parse as urlparse
 from contextlib import contextmanager
 from functools import partial
 from typing import TYPE_CHECKING, Any, Generator, Literal, Optional
-from urllib.parse import urlparse
 
 import requests
 from snakemake_interface_common.exceptions import WorkflowError
@@ -24,6 +25,13 @@ __all__ = ["StorageObject"]
 
 HTTPVerb = Literal["GET", "POST", "HEAD"]
 logger = get_logger()
+
+
+@dataclasses.dataclass
+class QueryParseResult:
+    library: str
+    filepath: str
+    overwrite: Optional[bool]
 
 
 class StorageObject(StorageObjectRead, StorageObjectWrite):
@@ -60,15 +68,45 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
     def __post_init__(self):
         if (site_url := self.provider.settings.site_url) is None:
             raise WorkflowError("No site URL specified")
-        parsed_site = urlparse(site_url)
+        parsed_site = urlparse.urlparse(site_url)
         self.site_url = site_url.rstrip("/")
         self.site_netloc = parsed_site.netloc
 
-        parsed_query = urlparse(self.query)
-        self.library = parsed_query.netloc
-        self.filepath = parsed_query.path.lstrip("/")
+        parsed_query = self.parse_query(self.query)
+        self.library = parsed_query.library
+        self.filepath = parsed_query.filepath
+        self.set_overwrite(parsed_query.overwrite)
 
-        self.allow_overwrite = self.provider.settings.allow_overwrite or False
+    def set_overwrite(self, overwrite: Optional[bool]) -> None:
+        match self.provider.settings.allow_overwrite:
+            case False:
+                self.allow_overwrite = False
+            case True:
+                self.allow_overwrite = overwrite or True
+            case _:
+                self.allow_overwrite = overwrite or False
+
+    @classmethod
+    def parse_query(cls, query: str) -> QueryParseResult:
+        parsed_query = urlparse.urlparse(query)
+        querystring = urlparse.parse_qs(parsed_query.query, keep_blank_values=True)
+        overwrite_string = querystring.get("overwrite", ["none"])[0].lower()
+        match overwrite_string:
+            case "true":
+                overwrite = True
+            case "":
+                overwrite = True
+            case "false":
+                overwrite = False
+            case "none":
+                overwrite = None
+            case _:
+                raise WorkflowError(f"Invalid overwrite value: {overwrite_string}")
+        return QueryParseResult(
+            library=parsed_query.netloc,
+            filepath=parsed_query.path.lstrip("/"),
+            overwrite=overwrite,
+        )
 
     async def inventory(self, cache: IOCacheStorageInterface):
         """From this file, try to find as much existence and modification date
@@ -116,6 +154,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
         return "/".join([self.site_netloc, self.library, self.filepath])
 
     def store_object(self):
+        logger.debug("Getting form digest value")
         with self.httpr(self.DIGEST_URL, "POST") as r:
             try:
                 r.raise_for_status()
@@ -128,6 +167,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
 
         headers = {"x-requestdigest": digest_value}
 
+        logger.info(f"Uploading {self.query}")
         with open(self.local_path(), "rb") as file:
             with self.httpr(
                 self.UPLOAD_FILE_URL, "POST", headers=headers, data=file.read()
@@ -135,9 +175,18 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
                 try:
                     r.raise_for_status()
                 except requests.HTTPError as e:
-                    raise WorkflowError(f"Failed to store {self.query}") from e
+                    en_dis_abled = (
+                        "enabled"
+                        if self.allow_overwrite
+                        else "disabled, allow by adding ?overwrite to the query"
+                    )
+                    raise WorkflowError(
+                        f"Failed to store {self.query} "
+                        f"(overwrite is {en_dis_abled})"
+                    ) from e
 
     def remove(self):
+        logger.debug(f"Removing {self.query} is not implemented.")
         pass
 
     @contextmanager  # makes this a context manager. after 'yield' is __exit__()
