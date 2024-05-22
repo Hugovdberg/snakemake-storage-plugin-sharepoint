@@ -19,7 +19,7 @@ from snakemake_interface_storage_plugins.storage_object import (
 from snakemake_interface_storage_plugins.storage_provider import StorageProviderBase
 
 if TYPE_CHECKING:
-    from .provider import StorageProvider
+    from .provider import StorageProvider as StorageProviderBase
 
 __all__ = ["StorageObject"]
 
@@ -49,7 +49,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
         "Files/add(url='{filename}',overwrite={overwrite})"
     )
     if TYPE_CHECKING:
-        provider: StorageProvider
+        provider: StorageProviderBase
 
     def __init__(
         self,
@@ -75,16 +75,22 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
         parsed_query = self.parse_query(self.query)
         self.library = parsed_query.library
         self.filepath = parsed_query.filepath
-        self.set_overwrite(parsed_query.overwrite)
+        self.allow_overwrite = self.get_overwrite_state(
+            parsed_query.overwrite, self.provider
+        )
 
-    def set_overwrite(self, overwrite: Optional[bool]) -> None:
-        match self.provider.settings.allow_overwrite:
+    @classmethod
+    def get_overwrite_state(
+        cls, overwrite: Optional[bool], provider: StorageProviderBase
+    ) -> bool:
+        match provider.settings.allow_overwrite:
             case False:
-                self.allow_overwrite = False
+                allow_overwrite = False
             case True:
-                self.allow_overwrite = overwrite if overwrite is not None else True
+                allow_overwrite = overwrite if overwrite is not None else True
             case _:
-                self.allow_overwrite = overwrite if overwrite is not None else False
+                allow_overwrite = overwrite if overwrite is not None else False
+        return allow_overwrite
 
     @classmethod
     def parse_query(cls, query: str) -> QueryParseResult:
