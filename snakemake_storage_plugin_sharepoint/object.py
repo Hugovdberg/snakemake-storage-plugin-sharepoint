@@ -82,9 +82,9 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
             case False:
                 self.allow_overwrite = False
             case True:
-                self.allow_overwrite = overwrite or True
+                self.allow_overwrite = overwrite if overwrite is not None else True
             case _:
-                self.allow_overwrite = overwrite or False
+                self.allow_overwrite = overwrite if overwrite is not None else False
 
     @classmethod
     def parse_query(cls, query: str) -> QueryParseResult:
