@@ -90,7 +90,7 @@ class StorageProviderSettings(StorageProviderSettingsBase):
                 "HTTP(S) authentication. AUTH_TYPE is the class name of "
                 "requests.auth (e.g. HTTPBasicAuth), ARG1,ARG2,... are the arguments "
                 "required by the specified type. PACKAGE is the full path to the "
-                "module from which to import the class (semantically this  does "
+                "module from which to import the class (semantically this does "
                 "'from PACKAGE import AUTH_TYPE')."
             ),
             "metavar": AUTH_METAVAR,
