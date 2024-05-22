@@ -8,7 +8,6 @@ import pathlib
 import tempfile
 from typing import Generator, List, Optional, Type
 
-import pytest
 from snakemake_interface_storage_plugins.settings import StorageProviderSettingsBase
 from snakemake_interface_storage_plugins.storage_provider import StorageProviderBase
 from snakemake_interface_storage_plugins.tests import TestStorageBase
