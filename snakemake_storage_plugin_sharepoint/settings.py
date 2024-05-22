@@ -57,7 +57,9 @@ def parse_auth(arg: Optional[str]) -> Optional[requests.auth.AuthBase]:
     except AttributeError:
         raise WorkflowError(
             f"Authentication type {auth_type} not supported. "
-            f"Please choose one of HTTPBasicAuth, HTTPDigestAuth, or OAuth1."
+            "Please choose one of HTTPBasicAuth, HTTPDigestAuth, or HTTPProxyAuth, "
+            "or specify the full path like module.AuthClass"
+            " (e.g. requests.auth.HTTPBasicAuth)."
         )
 
     try:
