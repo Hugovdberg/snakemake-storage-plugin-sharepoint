@@ -1,10 +1,8 @@
 [tool.poetry]
 name = "snakemake-storage-plugin-sharepoint"
-version = "0.4.0"
+version = "0.4.1"
 description = "Snakemake storage plugin for reading and writing files on Microsoft SharePoint."
-authors = [
-    "Hugo Lapre <hugo.lapre@brabantwater.nl>",
-]
+authors = ["Hugo Lapre <hugo.lapre@brabantwater.nl>"]
 readme = "README.md"
 repository = "https://github.com/Hugovdberg/snakemake-storage-plugin-sharepoint"
 documentation = "https://snakemake.github.io/snakemake-plugin-catalog/plugins/storage/sharepoint.html"
@@ -19,11 +17,11 @@ snakemake-interface-storage-plugins = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^24.4.2"
-coverage = {extras = ["toml"], version = "^7.3.2"}
+coverage = { extras = ["toml"], version = "^7.3.2" }
 flake8 = "^7.0.0"
 flake8-bugbear = "^24.4.26"
 pytest = "^8.1"
-snakemake = {git="https://github.com/snakemake/snakemake.git"}
+snakemake = { git = "https://github.com/snakemake/snakemake.git" }
 
 [build-system]
 requires = ["poetry-core"]
