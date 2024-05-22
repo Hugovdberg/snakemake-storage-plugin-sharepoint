@@ -16,10 +16,12 @@ from snakemake_interface_storage_plugins.storage_object import (
     StorageObjectRead,
     StorageObjectWrite,
 )
-from snakemake_interface_storage_plugins.storage_provider import StorageProviderBase
 
 if TYPE_CHECKING:
     from .provider import StorageProvider as StorageProviderBase
+else:
+    # Import base class to prevent import cycle since .provider needs to import .object
+    from snakemake_interface_storage_plugins.storage_provider import StorageProviderBase
 
 __all__ = ["StorageObject"]
 
