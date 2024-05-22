@@ -108,36 +108,36 @@ def storage_provider(
 class TestOverwriteState:
     def test_overwrite_state_setting_default_and_file_default_is_false(self):
         with storage_provider(allow_overwrite=None) as provider:
-            assert StorageObject.get_overwrite_state(None, provider) == False
+            assert not StorageObject.get_overwrite_state(None, provider)
 
     def test_overwrite_state_setting_default_and_file_true_is_true(self):
         with storage_provider(allow_overwrite=None) as provider:
-            assert StorageObject.get_overwrite_state(True, provider) == True
+            assert StorageObject.get_overwrite_state(True, provider)
 
     def test_overwrite_state_setting_default_and_file_false_is_false(self):
         with storage_provider(allow_overwrite=None) as provider:
-            assert StorageObject.get_overwrite_state(False, provider) == False
+            assert not StorageObject.get_overwrite_state(False, provider)
 
     def test_overwrite_state_setting_true_and_file_default_is_true(self):
         with storage_provider(allow_overwrite=True) as provider:
-            assert StorageObject.get_overwrite_state(None, provider) == True
+            assert StorageObject.get_overwrite_state(None, provider)
 
     def test_overwrite_state_setting_true_and_file_true_is_true(self):
         with storage_provider(allow_overwrite=True) as provider:
-            assert StorageObject.get_overwrite_state(True, provider) == True
+            assert StorageObject.get_overwrite_state(True, provider)
 
     def test_overwrite_state_setting_true_and_file_false_is_false(self):
         with storage_provider(allow_overwrite=True) as provider:
-            assert StorageObject.get_overwrite_state(False, provider) == False
+            assert not StorageObject.get_overwrite_state(False, provider)
 
     def test_overwrite_state_setting_false_and_file_default_is_false(self):
         with storage_provider(allow_overwrite=False) as provider:
-            assert StorageObject.get_overwrite_state(None, provider) == False
+            assert not StorageObject.get_overwrite_state(None, provider)
 
     def test_overwrite_state_setting_false_and_file_true_is_false(self):
         with storage_provider(allow_overwrite=False) as provider:
-            assert StorageObject.get_overwrite_state(True, provider) == False
+            assert not StorageObject.get_overwrite_state(True, provider)
 
     def test_overwrite_state_setting_false_and_file_false_is_false(self):
         with storage_provider(allow_overwrite=False) as provider:
-            assert StorageObject.get_overwrite_state(False, provider) == False
+            assert not StorageObject.get_overwrite_state(False, provider)
