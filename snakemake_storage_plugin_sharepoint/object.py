@@ -189,8 +189,8 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
                         else "disabled, allow by adding ?overwrite to the query"
                     )
                     raise WorkflowError(
-                        f"Failed to store {self.query} "
-                        f"(overwrite is {en_dis_abled})"
+                        f"Failed to store {self.query} (overwrite is {en_dis_abled})\n"
+                        f"Response: {r.status_code} - {r.text}"
                     ) from e
 
     def remove(self):
