@@ -63,9 +63,21 @@ pytest = "*"
 test = { cmd = "coverage run -m pytest tests/tests.py", depends-on = ["lint"] }
 coverage = { cmd = "coverage report -m", depends-on = ["test"] }
 
+[tool.pixi.feature.build.dependencies]
+python = "*"
+
+[tool.pixi.feature.build.pypi-dependencies]
+bump-my-version = "*"
+build = "*"
+
+[tool.pixi.feature.build.tasks]
+bumpversion = "bump-my-version bump"
+build = "python -m build -w"
+
 [tool.pixi.environments]
 lint = { features = ["lint"], no-default-feature = true }
 test = { features = ["test"], solve-group = "default" }
+build = { features = ["build"], no-default-feature = true }
 
 [tool.ruff]
 line-length = 88
