@@ -27,6 +27,19 @@ documentation = "https://snakemake.github.io/snakemake-plugin-catalog/plugins/st
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
+[tool.bumpversion]
+current_version = "0.4.2"
+tag = true
+tag_name = "v{new_version}"
+tag_message = "Release v{new_version}"
+commit = true
+message = "chore: bump version from {current_version} -> {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "snakemake_storage_plugin_sharepoint/__init__.py"
+search = "__version__ = \"{current_version}\""
+replace = "__version__ = \"{new_version}\""
+
 [tool.flit.module]
 name = "snakemake_storage_plugin_sharepoint"
 

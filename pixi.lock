@@ -2468,7 +2468,7 @@ packages:
 - pypi: .
   name: snakemake-storage-plugin-sharepoint
   version: 0.4.2
-  sha256: d3393cc3d5c851a74c52e76319e50064f6650fdb50afa12423ed80184a2773fd
+  sha256: 9449e293756af50a94efaad20750a8531a531f101ec43cdbf1ee18ab7fbe4dc3
   requires_dist:
   - requests
   - snakemake>=8
