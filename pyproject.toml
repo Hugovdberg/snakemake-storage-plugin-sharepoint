@@ -27,6 +27,9 @@ documentation = "https://snakemake.github.io/snakemake-plugin-catalog/plugins/st
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
+[tool.flit.module]
+name = "snakemake_storage_plugin_sharepoint"
+
 [tool.pixi.project]
 name = "snakemake-storage-plugin-sharepoint"
 channels = ["conda-forge"]

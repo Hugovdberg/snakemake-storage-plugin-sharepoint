@@ -754,8 +754,6 @@ packages:
   - libgcc >=13
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
-  arch: x86_64
-  platform: linux
   license: LGPL-2.1-or-later
   license_family: LGPL
   purls:
@@ -770,8 +768,6 @@ packages:
   - libgcc >=13
   - python >=3.13.0rc1,<3.14.0a0
   - python_abi 3.13.* *_cp313
-  arch: x86_64
-  platform: linux
   license: LGPL-2.1-or-later
   license_family: LGPL
   purls:
@@ -785,8 +781,6 @@ packages:
   - __osx >=10.13
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
-  arch: x86_64
-  platform: osx
   license: LGPL-2.1-or-later
   license_family: LGPL
   purls:
@@ -800,8 +794,6 @@ packages:
   - __osx >=10.13
   - python >=3.13.0rc1,<3.14.0a0
   - python_abi 3.13.* *_cp313
-  arch: x86_64
-  platform: osx
   license: LGPL-2.1-or-later
   license_family: LGPL
   purls:
@@ -817,8 +809,6 @@ packages:
   - ucrt >=10.0.20348.0
   - vc >=14.2,<15
   - vc14_runtime >=14.29.30139
-  arch: x86_64
-  platform: win
   license: LGPL-2.1-or-later
   license_family: LGPL
   purls:
@@ -834,8 +824,6 @@ packages:
   - ucrt >=10.0.20348.0
   - vc >=14.2,<15
   - vc14_runtime >=14.29.30139
-  arch: x86_64
-  platform: win
   license: LGPL-2.1-or-later
   license_family: LGPL
   purls:
@@ -2127,7 +2115,7 @@ packages:
 - pypi: .
   name: snakemake-storage-plugin-sharepoint
   version: 0.4.2
-  sha256: 36f9dfa563b2ea83a9def6ab4e00d258ddc458281dcd536534fbc0ea0749050a
+  sha256: 120c799581eb0bd59f7ecce60b0bb1d3d7e3af113cde6cb8a8a412f890452622
   requires_dist:
   - requests
   - snakemake>=8
