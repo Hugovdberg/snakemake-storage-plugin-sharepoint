@@ -1,28 +1,85 @@
-[tool.poetry]
+[project]
 name = "snakemake-storage-plugin-sharepoint"
-version = "0.4.2"
 description = "Snakemake storage plugin for reading and writing files on Microsoft SharePoint."
-authors = ["Hugo Lapre <hugo.lapre@brabantwater.nl>"]
+authors = [{ name = "Hugo Lapre", email = "hugo.lapre@brabantwater.nl" }]
 readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["snakemake", "plugin", "storage", "sharepoint"]
+requires-python = ">=3.11"
+dynamic = ["version"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "snakemake-interface-common>=1.14",
+  "snakemake-interface-storage-plugins>=3.0",
+]
+
+[project.urls]
 repository = "https://github.com/Hugovdberg/snakemake-storage-plugin-sharepoint"
 documentation = "https://snakemake.github.io/snakemake-plugin-catalog/plugins/storage/sharepoint.html"
-license = "MIT"
-keywords = ["snakemake", "plugin", "storage", "sharepoint"]
-
-
-[tool.poetry.dependencies]
-python = "^3.11"
-snakemake-interface-common = "^1.14.0"
-snakemake-interface-storage-plugins = "^3.0.0"
-
-[tool.poetry.dev-dependencies]
-black = "^24.4.2"
-coverage = { extras = ["toml"], version = "^7.3.2" }
-flake8 = "^7.0.0"
-flake8-bugbear = "^24.4.26"
-pytest = "^8.1"
-snakemake = { git = "https://github.com/snakemake/snakemake.git" }
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.pixi.project]
+name = "snakemake-storage-plugin-sharepoint"
+channels = ["conda-forge"]
+platforms = ["win-64"]
+
+[tool.pixi.pypi-dependencies]
+snakemake-storage-plugin-sharepoint = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+
+[tool.pixi.feature.lint.dependencies]
+ruff = "*"
+
+[tool.pixi.feature.lint.tasks]
+lint = "ruff check ."
+
+[tool.pixi.feature.test]
+channels = ["conda-forge", "bioconda"]
+
+[tool.pixi.feature.test.dependencies]
+snakemake = { version = "*", channel = "bioconda" }
+pytest = "*"
+
+[tool.pixi.feature.test.tasks]
+test = { cmd = "pytest tests/tests.py", depends-on = ["lint"] }
+
+[tool.pixi.feature.build.dependencies]
+python = "*"
+
+[tool.pixi.feature.build.pypi-dependencies]
+build = "*"
+simple503 = "*"
+bump-my-version = "*"
+
+[tool.pixi.feature.build.tasks]
+build = "build.bat"
+
+[tool.pixi.environments]
+lint = { features = ["lint"], no-default-feature = true }
+test = { features = ["test"], solve-group = "default" }
+build = { features = ["build"], no-default-feature = true }
+
+[tool.ruff]
+line-length = 88
+exclude = ["build", "dist", "docs", "venv"]
+
+[tool.ruff.lint]
+select = [
+  "C4",  # flake8-comprehensions
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "I",   # isort
+  "PT",  # pytest-style
+  "D",   # pydocstyle
+  "B",   # flake8-bugbear
+  "NPY", # numpy
+]
+extend-ignore = ["E203", "D203", "D213"]
