@@ -1,6 +1,5 @@
-# Required:
-# Implementation of storage object (also check out
-# snakemake_interface_storage_plugins.storage_object for more base class options)
+"""Definition of the StorageObject for SharePoint."""
+
 import dataclasses
 import datetime
 import urllib.parse as urlparse
@@ -37,6 +36,8 @@ class QueryParseResult:
 
 
 class StorageObject(StorageObjectRead, StorageObjectWrite):
+    """Definition of a ReadWritable storage object."""
+
     DIGEST_URL = "{site_url}/_api/contextinfo"
     GET_FILE_URL = (
         "{site_url}/_api/web/GetFolderByServerRelativeUrl('{folder}')/"
@@ -60,6 +61,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
         retrieve: bool,
         provider: StorageProviderBase,
     ):
+        """Initialize the StorageObject and set type hints for custom attributes."""
         self.allow_overwrite: bool
         self.site_url: str
         self.site_netloc: str
@@ -68,6 +70,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
         super().__init__(query, keep_local, retrieve, provider)
 
     def __post_init__(self):
+        """Populate the attributes defined in __init__."""
         if (site_url := self.provider.settings.site_url) is None:
             raise WorkflowError("No site URL specified")
         parsed_site = urlparse.urlparse(site_url)
@@ -85,6 +88,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
     def get_overwrite_state(
         cls, overwrite: Optional[bool], provider: StorageProviderBase
     ) -> bool:
+        """Determine whether a file can be overwritten."""
         match provider.settings.allow_overwrite:
             case False:
                 allow_overwrite = False
@@ -96,6 +100,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
 
     @classmethod
     def parse_query(cls, query: str) -> QueryParseResult:
+        """Parse the query string into the necessary components."""
         parsed_query = urlparse.urlparse(query)
         querystring = urlparse.parse_qs(parsed_query.query, keep_blank_values=True)
         overwrite_string = querystring.get("overwrite", ["none"])[0].lower()
@@ -117,9 +122,10 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
         )
 
     async def inventory(self, cache: IOCacheStorageInterface):
-        """From this file, try to find as much existence and modification date
-        information as possible. Only retrieve that information that comes for free
-        given the current object.
+        """From this file, try to find as much information as possible.
+
+        Return as much existence and modification date information as possible.
+        Only retrieve that information that comes for free given the current object.
         """
         with self.httpr(self.GET_FILE_URL) as r:
             name = str(self.local_path())
@@ -129,24 +135,30 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
             cache.size[name] = file_info.size()
 
     def get_inventory_parent(self) -> Optional[str]:
+        """Get inventory parent, not implemented for SharePoint."""
         return None
 
     def cleanup(self):
+        """Cleanup the object, not implemented for SharePoint."""
         pass
 
     def exists(self) -> bool:
+        """Determine whether the queried file exists on the server."""
         with self.httpr(self.GET_FILE_URL, "GET") as r:
             return FileInfo(r).exists()
 
     def mtime(self) -> float:
+        """Determine the modification time of the file."""
         with self.httpr(self.GET_FILE_URL, "GET") as r:
             return FileInfo(r).last_modified()
 
     def size(self) -> int:
+        """Determine the size of the file."""
         with self.httpr(self.GET_FILE_URL, "GET") as r:
             return FileInfo(r).size()
 
     def retrieve_object(self):
+        """Copy the file from the server locally."""
         self.local_path().parent.mkdir(parents=True, exist_ok=True)
         with (
             self.httpr(self.DOWNLOAD_FILE_URL, stream=True) as r,
@@ -159,9 +171,11 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
     # base class:
     # https://github.com/snakemake/snakemake-interface-storage-plugins/pull/48
     def local_suffix(self) -> str:  # type: ignore
+        """Get the local filepath relative to the local storage directory."""
         return "/".join([self.site_netloc, self.library, self.filepath])
 
     def store_object(self):
+        """Write the local copy to the server."""
         logger.debug("Getting form digest value")
         with self.httpr(self.DIGEST_URL, "POST") as r:
             try:
@@ -194,6 +208,11 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
                     ) from e
 
     def remove(self):
+        """Remove the file from the SharePoint server.
+
+        Currently not implemented as that would remove file history from the server as
+        well.
+        """
         logger.debug(f"Removing {self.query} is not implemented.")
         pass
 
@@ -207,6 +226,7 @@ class StorageObject(StorageObjectRead, StorageObjectWrite):
         data: Optional[Any] = None,
         **kwargs: Any,
     ) -> Generator[requests.Response, Any, None]:
+        """Context manager for the connection to the server."""
         _headers = {
             "Content-Type": "application/json; odata=verbose",
             "Accept": "application/json; odata=verbose",
