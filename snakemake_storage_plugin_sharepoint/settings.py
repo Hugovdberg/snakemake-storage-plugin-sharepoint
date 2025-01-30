@@ -1,3 +1,5 @@
+"""Module to define the storage provider settings."""
+
 import dataclasses
 import importlib
 import re
@@ -29,6 +31,7 @@ def _split(s: Optional[str], sep: str) -> List[str]:
 
 
 def parse_auth(arg: Optional[str]) -> Optional[requests.auth.AuthBase]:
+    """Parse the authentication options from the command line."""
     if arg is None:
         return None
 
@@ -48,27 +51,28 @@ def parse_auth(arg: Optional[str]) -> Optional[requests.auth.AuthBase]:
             raise WorkflowError(
                 f"Authentication package {auth_package} not found. "
                 "Please make sure it is installed."
-            )
+            ) from None
     else:
         auth_module = _PredefinedHTTPAuth
 
     try:
         auth_class: type[requests.auth.AuthBase] = getattr(auth_module, auth_type)
-    except AttributeError:
+    except AttributeError as e:
         raise WorkflowError(
             f"Authentication type {auth_type} not supported. "
             "Please choose one of HTTPBasicAuth, HTTPDigestAuth, or HTTPProxyAuth, "
             "or specify the full path like module.AuthClass"
             " (e.g. requests.auth.HTTPBasicAuth)."
-        )
+        ) from e
 
     try:
         return auth_class(*auth_args)
     except TypeError as e:
-        raise WorkflowError(str(e))
+        raise WorkflowError("Failed to initialize the authentication method.") from e
 
 
 def unparse_auth(auth: requests.auth.AuthBase) -> str:
+    """Write the used authentication method to a string."""
     return f"{auth.__class__.__module__}.{auth.__class__.__name__}"
 
 
@@ -83,6 +87,8 @@ def unparse_auth(auth: requests.auth.AuthBase) -> str:
 # settings.
 @dataclasses.dataclass
 class StorageProviderSettings(StorageProviderSettingsBase):
+    """Defines the custom settings for the SharePoint storage provider."""
+
     auth: Optional[requests.auth.AuthBase] = dataclasses.field(
         default=None,
         metadata={

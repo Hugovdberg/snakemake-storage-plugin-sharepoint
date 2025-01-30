@@ -1,5 +1,5 @@
-# Required:
-# Implementation of your storage provider
+"""Implementation of the storage provider protocol."""
+
 import urllib.parse as urlparse
 from typing import TYPE_CHECKING, Any, Iterable, List
 
@@ -20,10 +20,13 @@ logger = get_logger()
 
 
 class StorageProvider(StorageProviderBase):
+    """Implementation of the storage provider protocol."""
+
     if TYPE_CHECKING:
         settings: StorageProviderSettings
 
     def __post_init__(self):
+        """Post-initialize local fields."""
         super().__post_init__()
         if self.settings.site_url is not None:
             self.settings.site_url = self.settings.site_url.rstrip("/")
@@ -77,8 +80,7 @@ class StorageProvider(StorageProviderBase):
         ]
 
     def default_max_requests_per_second(self) -> float:
-        """Return the default maximum number of requests per second for this storage
-        provider."""
+        """Return the default maximum number of requests per second."""
         return 10.0
 
     def use_rate_limiter(self) -> bool:
@@ -87,6 +89,7 @@ class StorageProvider(StorageProviderBase):
 
     @classmethod
     def is_valid_query(cls, query: str) -> StorageQueryValidationResult:
+        """Determine whether the query is valid."""
         try:
             parsed = urlparse.urlparse(query)
         except Exception as e:
@@ -171,4 +174,5 @@ class StorageProvider(StorageProviderBase):
         return
 
     def list_objects(self, query: Any) -> Iterable[str]:
+        """Return a list of available storage objects from the server."""
         raise NotImplementedError()
