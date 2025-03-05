@@ -3927,8 +3927,8 @@ packages:
   timestamp: 1740658569102
 - pypi: .
   name: snakemake-storage-plugin-sharepoint
-  version: 0.4.3
-  sha256: 91e583e8d0936d3fec75ce5f13f92642d88e34e755eee42bbe0d72d49086aacb
+  version: 0.4.4
+  sha256: e4fe346e3efec6c0d29f347f223a7512a5ee70e87e8d1c9db943e04b4ae6f7bf
   requires_dist:
   - requests
   - snakemake-interface-common>=1.14
