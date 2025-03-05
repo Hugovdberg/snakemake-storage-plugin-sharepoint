@@ -70,6 +70,8 @@ channels = ["conda-forge", "bioconda"]
 [tool.pixi.feature.test.dependencies]
 coverage = "*"
 pytest = "*"
+snakemake = ">=8.29.0,<9"
+certifi = ">=2025.1.31,<2026"
 
 [tool.pixi.feature.test.tasks]
 test = { cmd = "coverage run -m pytest tests/tests.py", depends-on = ["lint"] }
